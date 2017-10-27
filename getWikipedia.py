@@ -9,7 +9,8 @@ wikiDataR = requests.get(wikiDataUrl)
 # Parse our data
 wikiData = json.loads(wikiDataR.text)["parse"]["text"]["*"]
 
-
+with open('./customData.txt') as f:
+    lines = f.read().splitlines()
 
 # Creates our regex filter for titles
 getTitles = re.compile('<b>(.*)<\/b>')
@@ -30,10 +31,9 @@ wikiData = getTitles.findall(wikiData)
 
 # clean up our data
 wikiData = list(map(clean, wikiData))
-
 # The last two values are "^"
-wikiData = wikiData[:-2]
+wikiData = wikiData[:-2] + lines
 output = open("char-rnn-tensorflow-master/data/codenames/input.txt", "w")
+print(wikiData)
 for item in wikiData:
   output.write("%s\n" % item)
-
