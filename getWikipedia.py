@@ -1,16 +1,21 @@
-import requests
 import json
 import re#eeeeeeeeeeeeeeeeeeeeeee
 
+import requests
+
 # Fetches our data
-wikiDataUrl = "https://en.wikipedia.org/w/api.php?action=parse&page=List_of_computer_technology_code_names&srlimit=1&format=json"
+wikipediaBase = "https://en.wikipedia.org/w/api.php?"
+wikipediaParams = "action=parse&srlimit=1&format=json&page="
+wikipediaPageName = "List_of_computer_technology_code_names"
+wikiDataUrl = wikipediaBase + wikipediaParams + wikipediaPageName
 wikiDataR = requests.get(wikiDataUrl)
 
 # Parse our data
 wikiData = json.loads(wikiDataR.text)["parse"]["text"]["*"]
 
+# Read custom imput
 with open('./customData.txt') as f:
-    lines = f.read().splitlines()
+    customData = f.read().splitlines()
 
 # Creates our regex filter for titles
 getTitles = re.compile('<b>(.*)<\/b>')
@@ -31,9 +36,15 @@ wikiData = getTitles.findall(wikiData)
 
 # clean up our data
 wikiData = list(map(clean, wikiData))
-# The last two values are "^"
-wikiData = wikiData[:-2] + lines
+wikiData = wikiData[:-2] # The last two values are "^"
+
+# Merge custom with scraped data
+unified = wikiData + customData
+
+
+print(unified)
+print("Number of entries: " + str(len(unified)) + " (Scaped: " + str(len(wikiData)) + ", Custom: " + str(len(customData)) + ")")
+
 output = open("char-rnn-tensorflow-master/data/codenames/input.txt", "w")
-print(wikiData)
-for item in wikiData:
-  output.write("%s\n" % item)
+for item in unified:
+    output.write("%s\n" % item)
